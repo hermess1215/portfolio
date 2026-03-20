@@ -1,0 +1,199 @@
+/* ===== 디자인 시스템 — 크림·베이지·브라운 팔레트 ===== */
+:root {
+  /* Light Mode */
+  --color-bg: #FAF8F3;
+  --color-surface: #F5F0E8;
+  --color-cream: #FFFDD0;
+  --color-beige: #D2B48C;
+  --color-mid: #8B6347;
+  --color-accent: #4B3621;
+  --color-text: #2C1A0E;
+  --color-text-muted: #7A5C3A;
+  --color-border: #E8DFD0;
+
+  /* Fonts */
+  --font-heading: 'Pretendard', 'Syne', sans-serif;
+  --font-body: 'Pretendard', 'Noto Sans KR', sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+
+  /* Spacing */
+  --section-padding: 6rem 0;
+  --container-max: 1100px;
+
+  /* Transitions */
+  --transition: 0.3s ease;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(75, 54, 33, 0.08);
+  --shadow-md: 0 8px 32px rgba(75, 54, 33, 0.12);
+  --shadow-lg: 0 16px 48px rgba(75, 54, 33, 0.16);
+}
+
+[data-theme='dark'] {
+  --color-bg: #1A1209;
+  --color-surface: #251D16;
+  --color-cream: #2E2316;
+  --color-beige: #8B6347;
+  --color-mid: #C4956A;
+  --color-accent: #D2A679;
+  --color-text: #FFFDD0;
+  --color-text-muted: #C4956A;
+  --color-border: #3A2D20;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== 기본 리셋 ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.7;
+  transition: background-color var(--transition), color var(--transition);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+}
+
+ul {
+  list-style: none;
+}
+
+/* ===== 공통 유틸리티 ===== */
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.section {
+  padding: var(--section-padding);
+}
+
+.section-label {
+  display: inline-block;
+  font-family: var(--font-code);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-mid);
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.section-divider {
+  width: 48px;
+  height: 3px;
+  background: var(--color-accent);
+  border-radius: 2px;
+  margin-bottom: 3rem;
+}
+
+/* ===== 스크롤 진입 애니메이션 ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ===== 버튼 공통 ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-cream);
+}
+
+.btn-primary:hover {
+  background: var(--color-mid);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-outline {
+  border: 2px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+.btn-outline:hover {
+  background: var(--color-accent);
+  color: var(--color-cream);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== 태그 ===== */
+.tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-family: var(--font-code);
+  font-size: 0.78rem;
+  color: var(--color-mid);
+  transition: all var(--transition);
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 768px) {
+  :root {
+    --section-padding: 4rem 0;
+  }
+}
