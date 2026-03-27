@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { FiSun, FiMoon, FiMenu, FiX } from 'react-icons/fi'
 import styles from './Navbar.module.css'
 
-const NAV_LINKS = [
-  { label: 'About', href: '#about' },
-  { label: 'Skills', href: '#skills' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Experience', href: '#experience' },
-  { label: 'Contact', href: '#contact' },
+const SECTION_LINKS = [
+  { label: 'About', href: '/#about' },
+  { label: 'Skills', href: '/#skills' },
+  { label: 'Projects', href: '/#projects' },
+  { label: 'Experience', href: '/#experience' },
+  { label: 'Contact', href: '/#contact' },
 ]
 
 export default function Navbar({ isDark, toggleTheme }) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const { pathname } = useLocation()
+  const isBoard = pathname === '/board'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30)
@@ -25,20 +28,29 @@ export default function Navbar({ isDark, toggleTheme }) {
   return (
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
       <nav className={`${styles.nav} container`}>
-        <a href="#hero" className={styles.logo}>
+        <Link to="/" className={styles.logo}>
           <span className={styles.logoCode}>&lt;</span>
           JH
           <span className={styles.logoCode}> /&gt;</span>
-        </a>
+        </Link>
 
         <ul className={`${styles.links} ${menuOpen ? styles.open : ''}`}>
-          {NAV_LINKS.map(({ label, href }) => (
+          {SECTION_LINKS.map(({ label, href }) => (
             <li key={href}>
               <a href={href} className={styles.link} onClick={closeMenu}>
                 {label}
               </a>
             </li>
           ))}
+          <li>
+            <Link
+              to="/board"
+              className={`${styles.link} ${isBoard ? styles.activeLink : ''} ${styles.boardLink}`}
+              onClick={closeMenu}
+            >
+              게시판
+            </Link>
+          </li>
         </ul>
 
         <div className={styles.actions}>

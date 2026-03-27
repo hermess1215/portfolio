@@ -23,9 +23,7 @@ export default function About() {
           {/* 프로필 이미지 */}
           <div className={`${styles.imageCol} reveal`}>
             <div className={styles.imageWrapper}>
-              <div className={styles.imagePlaceholder}>
-                <span className={styles.initials}>JH</span>
-              </div>
+              <img src="/profile.jpg" alt="김재휘 프로필" className={styles.profileImg} />
               <div className={styles.imageDeco} aria-hidden />
             </div>
           </div>

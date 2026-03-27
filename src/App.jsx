@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar/Navbar'
 import Hero from './components/Hero/Hero'
 import About from './components/About/About'
@@ -6,6 +7,7 @@ import Skills from './components/Skills/Skills'
 import Projects from './components/Projects/Projects'
 import Experience from './components/Experience/Experience'
 import Contact from './components/Contact/Contact'
+import Board from './pages/Board/Board'
 import styles from './App.module.css'
 
 function App() {
@@ -19,17 +21,24 @@ function App() {
     localStorage.setItem('theme', isDark ? 'dark' : 'light')
   }, [isDark])
 
+  const toggleTheme = () => setIsDark(d => !d)
+
   return (
     <div className={styles.app}>
-      <Navbar isDark={isDark} toggleTheme={() => setIsDark(d => !d)} />
-      <main>
-        <Hero />
-        <About />
-        <Skills />
-        <Projects />
-        <Experience />
-        <Contact />
-      </main>
+      <Navbar isDark={isDark} toggleTheme={toggleTheme} />
+      <Routes>
+        <Route path="/" element={
+          <main>
+            <Hero />
+            <About />
+            <Skills />
+            <Projects />
+            <Experience />
+            <Contact />
+          </main>
+        } />
+        <Route path="/board" element={<Board />} />
+      </Routes>
       <footer className={styles.footer}>
         <div className="container">
           <p>© 2025 김재휘. Crafted with React</p>

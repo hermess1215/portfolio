@@ -75,6 +75,18 @@
   width: 100%;
 }
 
+.activeLink {
+  color: var(--color-accent);
+}
+
+.activeLink::after {
+  width: 100%;
+}
+
+.boardLink {
+  font-weight: 600;
+}
+
 .actions {
   display: flex;
   align-items: center;
