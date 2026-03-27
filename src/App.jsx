@@ -27,16 +27,7 @@ function App() {
     <div className={styles.app}>
       <Navbar isDark={isDark} toggleTheme={toggleTheme} />
       <Routes>
-        <Route path="/" element={
-          <main>
-            <Hero />
-            <About />
-            <Skills />
-            <Projects />
-            <Experience />
-            <Contact />
-          </main>
-        } />
+        <Route path="/" element={<main><Hero /><About /><Skills /><Projects /><Experience /><Contact /></main>} />
         <Route path="/board" element={<Board />} />
       </Routes>
       <footer className={styles.footer}>

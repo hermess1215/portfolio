@@ -3,14 +3,6 @@ import { Link, useLocation } from 'react-router-dom'
 import { FiSun, FiMoon, FiMenu, FiX } from 'react-icons/fi'
 import styles from './Navbar.module.css'
 
-const SECTION_LINKS = [
-  { label: 'About', href: '/#about' },
-  { label: 'Skills', href: '/#skills' },
-  { label: 'Projects', href: '/#projects' },
-  { label: 'Experience', href: '/#experience' },
-  { label: 'Contact', href: '/#contact' },
-]
-
 export default function Navbar({ isDark, toggleTheme }) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -35,13 +27,11 @@ export default function Navbar({ isDark, toggleTheme }) {
         </Link>
 
         <ul className={`${styles.links} ${menuOpen ? styles.open : ''}`}>
-          {SECTION_LINKS.map(({ label, href }) => (
-            <li key={href}>
-              <a href={href} className={styles.link} onClick={closeMenu}>
-                {label}
-              </a>
-            </li>
-          ))}
+          <li>
+            <a href="/#about" className={styles.link} onClick={closeMenu}>
+              About
+            </a>
+          </li>
           <li>
             <Link
               to="/board"
