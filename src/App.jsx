@@ -8,6 +8,7 @@ import Projects from './components/Projects/Projects'
 import Experience from './components/Experience/Experience'
 import Contact from './components/Contact/Contact'
 import Board from './pages/Board/Board'
+import StudyPage from './pages/Study/StudyPage'
 import styles from './App.module.css'
 
 function App() {
@@ -26,10 +27,13 @@ function App() {
   return (
     <div className={styles.app}>
       <Navbar isDark={isDark} toggleTheme={toggleTheme} />
-      <Routes>
-        <Route path="/" element={<main><Hero /><About /><Skills /><Projects /><Experience /><Contact /></main>} />
-        <Route path="/board" element={<Board />} />
-      </Routes>
+      <div className={styles.content}>
+        <Routes>
+          <Route path="/" element={<main><Hero /><About /><Skills /><Projects /><Experience /><Contact /></main>} />
+          <Route path="/board" element={<Board />} />
+          <Route path="/study" element={<StudyPage />} />
+        </Routes>
+      </div>
       <footer className={styles.footer}>
         <div className="container">
           <p>© 2025 김재휘. Crafted with React</p>

@@ -8,6 +8,7 @@ export default function Navbar({ isDark, toggleTheme }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { pathname } = useLocation()
   const isBoard = pathname === '/board'
+  const isStudy = pathname === '/study'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30)
@@ -35,10 +36,19 @@ export default function Navbar({ isDark, toggleTheme }) {
           <li>
             <Link
               to="/board"
-              className={`${styles.link} ${isBoard ? styles.activeLink : ''} ${styles.boardLink}`}
+              className={`${styles.link} ${isBoard ? styles.activeLink : ''}`}
               onClick={closeMenu}
             >
-              게시판
+              Board
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/study"
+              className={`${styles.link} ${isStudy ? styles.activeLink : ''}`}
+              onClick={closeMenu}
+            >
+              Study
             </Link>
           </li>
         </ul>
