@@ -40,7 +40,7 @@ export default function About() {
             </p>
             <p className={`${styles.bio} reveal reveal-delay-2`}>
               React를 중심으로 프론트엔드 개발에 집중하고 있으며,
-              CodeCraft 동아리 활동을 통해 팀 프로젝트 경험을 쌓고 있습니다.
+              MC 동아리 활동을 통해 팀 프로젝트 경험을 쌓고 있습니다.
             </p>
 
             <ul className={`${styles.infoList} reveal reveal-delay-3`}>
