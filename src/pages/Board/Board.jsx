@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowLeft, FiEdit3, FiTrash2, FiEye, FiAlertCircle, FiEdit } from 'react-icons/fi'
+import { FiArrowLeft, FiEdit3, FiTrash2, FiEye, FiAlertCircle, FiEdit, FiLogIn, FiX } from 'react-icons/fi'
 import supabase from '../../supabase'
+import { useAuth } from '../../context/AuthContext'
 import styles from './Board.module.css'
 
 export default function Board() {
+  const { user, signIn, signOut } = useAuth()
+
   const [view, setView] = useState('list')
   const [posts, setPosts] = useState([])
   const [selectedPost, setSelectedPost] = useState(null)
@@ -13,6 +16,11 @@ export default function Board() {
   const [form, setForm] = useState({ title: '', author: '', password: '', content: '' })
   const [formErrors, setFormErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
+
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' })
+  const [loginError, setLoginError] = useState('')
+  const [loginLoading, setLoginLoading] = useState(false)
 
   // ===== 목록 불러오기 =====
   const fetchPosts = useCallback(async () => {
@@ -34,7 +42,6 @@ export default function Board() {
     setLoading(true)
     setError('')
 
-    // 조회수 증가
     await supabase.from('posts').update({ views: post.views + 1 }).eq('id', post.id)
 
     const { data, error: err } = await supabase
@@ -55,7 +62,11 @@ export default function Board() {
   }
 
   const goToWrite = () => {
-    setForm({ title: '', author: '', password: '', content: '' })
+    if (!user) {
+      setShowLoginModal(true)
+      return
+    }
+    setForm({ title: '', author: user.email, password: '', content: '' })
     setFormErrors({})
     setError('')
     setView('write')
@@ -75,9 +86,31 @@ export default function Board() {
     if (formErrors[name]) setFormErrors(err => ({ ...err, [name]: '' }))
   }
 
+  // ===== 로그인 =====
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    setLoginLoading(true)
+    setLoginError('')
+    const err = await signIn(loginForm.email, loginForm.password)
+    if (err) {
+      setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
+    } else {
+      setShowLoginModal(false)
+      setLoginForm({ email: '', password: '' })
+    }
+    setLoginLoading(false)
+  }
+
+  const closeLoginModal = () => {
+    setShowLoginModal(false)
+    setLoginForm({ email: '', password: '' })
+    setLoginError('')
+  }
+
   // ===== 글 등록 =====
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!user) { setShowLoginModal(true); return }
     const errs = {}
     if (!form.title.trim()) errs.title = '제목을 입력해주세요'
     if (!form.author.trim()) errs.author = '작성자를 입력해주세요'
@@ -102,7 +135,7 @@ export default function Board() {
     setSubmitting(false)
   }
 
-  // ===== 수정 시작 (비밀번호 확인 후 edit 뷰로) =====
+  // ===== 수정 시작 =====
   const handleEditStart = async () => {
     if (!selectedPost) return
     const pw = window.prompt('수정하려면 비밀번호를 입력하세요')
@@ -160,7 +193,6 @@ export default function Board() {
     if (pw === null) return
 
     setLoading(true)
-    // 비밀번호 확인
     const { data } = await supabase
       .from('posts')
       .select('password')
@@ -187,6 +219,42 @@ export default function Board() {
     new Date(dateStr).toLocaleDateString('ko-KR', {
       year: 'numeric', month: '2-digit', day: '2-digit',
     })
+
+  // ===== 로그인 모달 =====
+  const loginModal = showLoginModal && (
+    <div className={styles.overlay} onClick={closeLoginModal}>
+      <div className={styles.loginModal} onClick={e => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <h3>로그인</h3>
+          <button className={styles.closeBtn} onClick={closeLoginModal}><FiX /></button>
+        </div>
+        <p className={styles.loginDesc}>글을 작성하려면 로그인이 필요합니다.</p>
+        <form className={styles.loginForm} onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="이메일"
+            value={loginForm.email}
+            onChange={e => { setLoginForm(f => ({ ...f, email: e.target.value })); setLoginError('') }}
+            className={styles.input}
+            autoFocus
+            required
+          />
+          <input
+            type="password"
+            placeholder="비밀번호"
+            value={loginForm.password}
+            onChange={e => { setLoginForm(f => ({ ...f, password: e.target.value })); setLoginError('') }}
+            className={styles.input}
+            required
+          />
+          {loginError && <p className={styles.loginError}>{loginError}</p>}
+          <button type="submit" className="btn btn-primary" disabled={loginLoading} style={{ width: '100%' }}>
+            {loginLoading ? '로그인 중...' : '로그인'}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
 
   // ===== LIST VIEW =====
   if (view === 'list') return (
@@ -244,6 +312,7 @@ export default function Board() {
           </div>
         )}
       </div>
+      {loginModal}
     </main>
   )
 
@@ -281,7 +350,7 @@ export default function Board() {
             </div>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="password">
-                비밀번호 * <small>(삭제 시 필요)</small>
+                비밀번호 * <small>(수정·삭제 시 필요)</small>
               </label>
               <input id="password" type="password" name="password" value={form.password}
                 onChange={handleChange}

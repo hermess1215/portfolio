@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { FiExternalLink, FiBook, FiCheckCircle, FiLoader, FiPlus, FiEdit2, FiTrash2, FiX, FiLock, FiEye, FiEdit } from 'react-icons/fi'
+import { FiExternalLink, FiBook, FiCheckCircle, FiLoader, FiPlus, FiEdit2, FiTrash2, FiX, FiLock, FiEye, FiEdit, FiUpload, FiPaperclip, FiDownload } from 'react-icons/fi'
 import supabase from '../../supabase'
 import styles from './StudyLog.module.css'
 
@@ -14,7 +14,12 @@ const CATEGORY_COLORS = {
 }
 
 const CATEGORIES = ['Frontend', 'Backend', 'CS', 'Algorithm', 'DevOps', '기타']
-const EMPTY_FORM = { title: '', category: 'Frontend', memo: '', status: '학습 중', reference_url: '' }
+const EMPTY_FORM = { title: '', category: 'Frontend', memo: '', status: '학습 중', reference_url: '', file_url: '', file_name: '' }
+
+function isImage(url) {
+  if (!url) return false
+  return /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i.test(url.split('?')[0])
+}
 
 export default function StudyLog() {
   const [logs, setLogs] = useState([])
@@ -31,9 +36,15 @@ export default function StudyLog() {
   const [editTarget, setEditTarget] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
-  const [formTab, setFormTab] = useState('write') // 'write' | 'preview'
+  const [formTab, setFormTab] = useState('write')
 
-  const [detailLog, setDetailLog] = useState(null) // 상세 보기
+  // 파일 업로드 상태
+  const [uploadFile, setUploadFile] = useState(null)
+  const [uploadPreview, setUploadPreview] = useState(null)
+  const [uploadError, setUploadError] = useState('')
+  const fileInputRef = useRef(null)
+
+  const [detailLog, setDetailLog] = useState(null)
 
   useEffect(() => { fetchLogs() }, [])
 
@@ -59,9 +70,17 @@ export default function StudyLog() {
     }
   }
 
+  function resetFileState() {
+    setUploadFile(null)
+    setUploadPreview(null)
+    setUploadError('')
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   function openAdd() {
     setEditTarget(null)
     setForm(EMPTY_FORM)
+    resetFileState()
     setFormTab('write')
     setShowForm(true)
   }
@@ -75,9 +94,51 @@ export default function StudyLog() {
       memo: log.memo ?? '',
       status: log.status,
       reference_url: log.reference_url ?? '',
+      file_url: log.file_url ?? '',
+      file_name: log.file_name ?? '',
     })
+    resetFileState()
     setFormTab('write')
     setShowForm(true)
+  }
+
+  function handleFileChange(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('파일 크기는 10MB 이하여야 합니다.')
+      return
+    }
+    setUploadError('')
+    setUploadFile(file)
+    if (file.type.startsWith('image/')) {
+      setUploadPreview(URL.createObjectURL(file))
+    } else {
+      setUploadPreview(null)
+    }
+  }
+
+  function handleDrop(e) {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
+    if (!file) return
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('파일 크기는 10MB 이하여야 합니다.')
+      return
+    }
+    setUploadError('')
+    setUploadFile(file)
+    if (file.type.startsWith('image/')) {
+      setUploadPreview(URL.createObjectURL(file))
+    } else {
+      setUploadPreview(null)
+    }
+  }
+
+  function clearFile(e) {
+    if (e) e.stopPropagation()
+    resetFileState()
+    setForm(f => ({ ...f, file_url: '', file_name: '' }))
   }
 
   async function handleSubmit(e) {
@@ -85,12 +146,38 @@ export default function StudyLog() {
     if (!form.title.trim()) return
     setSubmitting(true)
 
+    let fileUrl = form.file_url || null
+    let fileName = form.file_name || null
+
+    if (uploadFile) {
+      const ext = uploadFile.name.split('.').pop()
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error: upErr } = await supabase.storage
+        .from('study-files')
+        .upload(path, uploadFile)
+
+      if (upErr) {
+        setUploadError('파일 업로드에 실패했습니다.')
+        setSubmitting(false)
+        return
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('study-files')
+        .getPublicUrl(path)
+
+      fileUrl = publicUrl
+      fileName = uploadFile.name
+    }
+
     const payload = {
       title: form.title.trim(),
       category: form.category,
       memo: form.memo.trim() || null,
       status: form.status,
       reference_url: form.reference_url.trim() || null,
+      file_url: fileUrl,
+      file_name: fileName,
     }
 
     if (editTarget) {
@@ -122,6 +209,11 @@ export default function StudyLog() {
   const total      = logs.length
   const done       = logs.filter(l => l.status === '완료').length
   const inProgress = total - done
+
+  // 현재 파일 표시 상태 (폼 내)
+  const hasNewFile = !!uploadFile
+  const hasExistingFile = !uploadFile && !!form.file_url
+  const hasAnyFile = hasNewFile || hasExistingFile
 
   return (
     <section id="studylog" className={`section ${styles.section}`}>
@@ -219,6 +311,20 @@ export default function StudyLog() {
 
                 <h3 className={styles.title}>{log.title}</h3>
 
+                {/* 첨부 이미지 썸네일 */}
+                {log.file_url && isImage(log.file_url) && (
+                  <div className={styles.cardThumb}>
+                    <img src={log.file_url} alt="첨부 이미지" />
+                  </div>
+                )}
+
+                {log.file_url && !isImage(log.file_url) && (
+                  <div className={styles.cardFileChip}>
+                    <FiPaperclip />
+                    <span>{log.file_name || '첨부 파일'}</span>
+                  </div>
+                )}
+
                 {log.memo && (
                   <div className={`${styles.memoPreview} ${styles.markdown}`}>
                     <ReactMarkdown>{log.memo}</ReactMarkdown>
@@ -263,6 +369,19 @@ export default function StudyLog() {
               {new Date(detailLog.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
 
+            {/* 첨부 파일 - 상세 */}
+            {detailLog.file_url && (
+              <div className={styles.detailFile}>
+                {isImage(detailLog.file_url) ? (
+                  <img src={detailLog.file_url} alt="첨부 이미지" className={styles.detailImg} />
+                ) : (
+                  <a href={detailLog.file_url} target="_blank" rel="noopener noreferrer" className={styles.detailFileLink}>
+                    <FiDownload /> {detailLog.file_name || '첨부 파일 다운로드'}
+                  </a>
+                )}
+              </div>
+            )}
+
             {detailLog.memo && (
               <div className={`${styles.detailContent} ${styles.markdown}`}>
                 <ReactMarkdown>{detailLog.memo}</ReactMarkdown>
@@ -305,7 +424,7 @@ export default function StudyLog() {
             </div>
             <form onSubmit={handleSubmit} className={styles.logForm}>
               <label className={styles.label}>
-                제목 <span className={styles.required}></span>
+                제목 <span className={styles.required}>*</span>
                 <input type="text" placeholder="공부한 내용을 입력하세요" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className={styles.input} required />
               </label>
 
@@ -351,6 +470,51 @@ export default function StudyLog() {
                     {form.memo ? <ReactMarkdown>{form.memo}</ReactMarkdown> : <p className={styles.previewEmpty}>내용을 입력하면 여기에 미리보기가 표시됩니다.</p>}
                   </div>
                 )}
+              </div>
+
+              {/* 파일 업로드 */}
+              <div className={styles.label}>
+                <span>파일 / 이미지 <span className={styles.optional}>(선택, 최대 10MB)</span></span>
+                <div
+                  className={`${styles.uploadArea} ${hasAnyFile ? styles.uploadAreaFilled : ''}`}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={handleDrop}
+                >
+                  {uploadPreview ? (
+                    <div className={styles.uploadPreviewWrap} onClick={e => e.stopPropagation()}>
+                      <img src={uploadPreview} alt="미리보기" className={styles.uploadPreviewImg} />
+                      <button type="button" className={styles.uploadClearBtn} onClick={clearFile}><FiX /></button>
+                    </div>
+                  ) : hasExistingFile && isImage(form.file_url) ? (
+                    <div className={styles.uploadPreviewWrap} onClick={e => e.stopPropagation()}>
+                      <img src={form.file_url} alt="기존 이미지" className={styles.uploadPreviewImg} />
+                      <button type="button" className={styles.uploadClearBtn} onClick={clearFile}><FiX /></button>
+                    </div>
+                  ) : hasAnyFile ? (
+                    <div className={styles.uploadFileInfo} onClick={e => e.stopPropagation()}>
+                      <FiPaperclip className={styles.uploadFileIcon} />
+                      <span className={styles.uploadFileName}>
+                        {uploadFile ? uploadFile.name : form.file_name}
+                      </span>
+                      <button type="button" className={styles.uploadClearBtn} onClick={clearFile}><FiX /></button>
+                    </div>
+                  ) : (
+                    <div className={styles.uploadPrompt}>
+                      <FiUpload className={styles.uploadIcon} />
+                      <span>클릭하거나 파일을 드래그하세요</span>
+                      <small>이미지, PDF, 문서 등</small>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,application/pdf,.doc,.docx,.txt,.md,.zip,.pptx,.xlsx"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                />
+                {uploadError && <p className={styles.errorMsg}>{uploadError}</p>}
               </div>
 
               <label className={styles.label}>

@@ -131,6 +131,166 @@
   border-color: var(--color-accent);
 }
 
+/* ===== 로그인/로그아웃 버튼 ===== */
+.authBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0 0.75rem;
+  height: 36px;
+  border-radius: 8px;
+  border: 1.5px solid var(--color-accent);
+  color: var(--color-accent);
+  background: none;
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.authBtn:hover {
+  background: var(--color-accent);
+  color: var(--color-cream);
+}
+
+.authBtnLabel {
+  font-size: 0.82rem;
+}
+
+.mobileAuthItem {
+  display: none;
+}
+
+.loginBtnMobile,
+.logoutBtnMobile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+  color: var(--color-text-muted);
+  padding: 0;
+}
+
+.loginBtnMobile:hover {
+  color: var(--color-accent);
+}
+
+.logoutBtnMobile:hover {
+  color: #c94444;
+}
+
+/* ===== 로그인 모달 ===== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.loginModal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 380px;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modalHeader h3 {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.closeBtn:hover {
+  color: var(--color-text);
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.loginInput {
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.loginInput:focus {
+  border-color: var(--color-accent);
+}
+
+.loginError {
+  font-size: 0.83rem;
+  color: #c94444;
+  font-family: var(--font-code);
+  margin: 0;
+}
+
+.loginSubmitBtn {
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-accent);
+  color: var(--color-cream);
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  width: 100%;
+}
+
+.loginSubmitBtn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.loginSubmitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* 모바일 */
 @media (max-width: 768px) {
   .menuBtn {
@@ -160,5 +320,13 @@
 
   .link {
     font-size: 1.1rem;
+  }
+
+  .authBtn {
+    display: none;
+  }
+
+  .mobileAuthItem {
+    display: flex;
   }
 }

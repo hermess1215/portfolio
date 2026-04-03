@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
 import Navbar from './components/Navbar/Navbar'
 import Hero from './components/Hero/Hero'
 import About from './components/About/About'
@@ -25,6 +26,7 @@ function App() {
   const toggleTheme = () => setIsDark(d => !d)
 
   return (
+    <AuthProvider>
     <div className={styles.app}>
       <Navbar isDark={isDark} toggleTheme={toggleTheme} />
       <div className={styles.content}>
@@ -40,6 +42,7 @@ function App() {
         </div>
       </footer>
     </div>
+    </AuthProvider>
   )
 }
 
