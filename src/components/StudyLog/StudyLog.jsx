@@ -305,7 +305,7 @@ export default function StudyLog() {
             </div>
             <form onSubmit={handleSubmit} className={styles.logForm}>
               <label className={styles.label}>
-                제목 <span className={styles.required}>*</span>
+                제목 <span className={styles.required}></span>
                 <input type="text" placeholder="공부한 내용을 입력하세요" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className={styles.input} required />
               </label>
 
